@@ -1,0 +1,66 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Typecheck and test (Node ${{ matrix.node }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ['22', '24']
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      # --legacy-peer-deps: the @kirora/react-native peer dependency is not on npm yet.
+      # --ignore-scripts: skips `prepare`, so the plugin is compiled once, by the next step.
+      - run: npm ci --legacy-peer-deps --ignore-scripts
+      - run: npm test
+
+  example-prebuild:
+    name: Prebuild the example app
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: kirora-expo-plugin
+    steps:
+      # The example links the SDKs from checkouts next to this repository, as in development.
+      - uses: actions/checkout@v7
+        with:
+          path: kirora-expo-plugin
+      - uses: actions/checkout@v7
+        with:
+          repository: kiroratech/kirora-react-native
+          path: kirora-react-native
+      - uses: actions/checkout@v7
+        with:
+          repository: kiroratech/kirora-ios
+          path: kirora-ios
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: |
+            kirora-expo-plugin/package-lock.json
+            kirora-expo-plugin/example/package-lock.json
+      - run: npm ci --legacy-peer-deps --ignore-scripts
+      - run: npm run build
+      # --ignore-scripts: prebuild needs no linked package compiled, and the plugin already is.
+      - run: npm ci --legacy-peer-deps --ignore-scripts
+        working-directory: kirora-expo-plugin/example
+      # Prebuild needs no Xcode or CocoaPods with --no-install, so this runs on Linux.
+      - run: ./scripts/check-example-prebuild.sh
