@@ -19,8 +19,6 @@ push setup for [`@kirora/react-native`](https://github.com/kiroratech/kirora-rea
 | Expo SDK | 53 and later | 58 |
 | `@kirora/react-native` | 0.1.0 and later | 0.1.x |
 
-Tested with the [example app](example/README.md) on Android and iPhone devices.
-
 ## Quick start
 
 1. **Install:**
