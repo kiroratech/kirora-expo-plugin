@@ -8,7 +8,7 @@
     "start": "expo start --dev-client",
     "android": "expo run:android",
     "ios": "expo run:ios",
-    "eas-build-pre-install": "./scripts/eas-native-sdks.sh",
+    "eas-build-pre-install": "./scripts/eas-pre-install.sh",
     "vendor-sdk": "rm -f vendor/*.tgz && (cd ../../kirora-react-native && npm pack --pack-destination ../kirora-expo-plugin/example/vendor) && mv vendor/kirora-react-native-*.tgz vendor/kirora-react-native.tgz && npm install --legacy-peer-deps @kirora/react-native@file:vendor/kirora-react-native.tgz"
   },
   "dependencies": {

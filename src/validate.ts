@@ -13,8 +13,7 @@ const IOS_KEYS = Object.keys({
   notificationServiceExtension: true,
   deploymentTarget: true,
   apiUrl: true,
-  appleTeamId: true,
-  localSdkPath: true
+  appleTeamId: true
 } satisfies AllKeys<KiroraPluginProps['ios']>);
 
 function isObject(value: unknown): value is Record<string, unknown> {
@@ -60,7 +59,6 @@ export function validateProps(props: unknown): KiroraPluginProps {
     optionalString('ios.deploymentTarget', ios.deploymentTarget, /^\d+(\.\d+){0,2}$/, 'a version such as "15.1"');
     optionalString('ios.apiUrl', ios.apiUrl, /^https?:\/\/\S+$/, 'an http(s) URL');
     optionalString('ios.appleTeamId', ios.appleTeamId);
-    optionalString('ios.localSdkPath', ios.localSdkPath);
   }
 
   return props as KiroraPluginProps;

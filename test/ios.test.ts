@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import fs from 'fs';
+import os from 'os';
 import path from 'path';
 import { test } from 'node:test';
 import { IOSConfig, type XcodeProject } from 'expo/config-plugins';
@@ -100,6 +101,24 @@ test("writes the Podfile block once, with the extension's platform and the app's
   assert.match(twice, new RegExp(`target '${NSE_TARGET_NAME}' do\\n  platform :ios, '17.0'`));
   assert.match(twice, /use_frameworks! :linkage => podfile_properties\['ios.useFrameworks'\]/);
   assert.match(twice, /use_frameworks! :linkage => ENV\['USE_FRAMEWORKS'\]/);
+});
+
+test("takes the extension's pod from the kirora-ios copy @kirora/react-native bundles", async () => {
+  assert.match(
+    await podfile(),
+    /pod 'KiroraNotificationService', :path => '\.\.\/node_modules\/@kirora\/react-native\/ios\/vendor\/kirora-ios'/
+  );
+  // Outside TMP_ROOT, whose node_modules has the package.
+  const elsewhere = fs.mkdtempSync(path.join(os.tmpdir(), 'kirora-no-sdk-'));
+  const src = fs.readFileSync(path.join(FIXTURES, 'ios/Podfile'), 'utf8');
+  try {
+    await assert.rejects(
+      runMod(applyPlugin({}, baseConfig()), 'ios', 'podfile', { contents: src }, elsewhere),
+      /needs @kirora\/react-native installed/
+    );
+  } finally {
+    fs.rmSync(elsewhere, { recursive: true, force: true });
+  }
 });
 
 test('drops the Podfile block when the extension is turned off', async () => {

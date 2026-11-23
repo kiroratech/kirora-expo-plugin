@@ -6,10 +6,6 @@
   "build": {
     "preview": {
       "distribution": "internal",
-      "env": {
-        "KIRORA_IOS_SDK_PATH": "./.kirora/kirora-ios",
-        "KIRORA_IOS_REF": "44d7d19ee90b2fcbf0ee557afe9eaf617cc669ca"
-      },
       "android": {
         "buildType": "apk"
       },

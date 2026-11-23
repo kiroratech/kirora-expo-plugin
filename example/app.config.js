@@ -9,9 +9,6 @@ const { withAndroidManifest } = require('expo/config-plugins');
 const googleServices = process.env.GOOGLE_SERVICES_JSON ?? './google-services.json';
 const hasGoogleServices = fs.existsSync(path.resolve(__dirname, googleServices));
 
-// Until Kirora's iOS pods are published, build against a local kirora-ios checkout.
-const localIosSdk = process.env.KIRORA_IOS_SDK_PATH ?? '../../kirora-ios';
-
 // The fake API is plain http, which Android refuses outside debug builds. Allowed only while the
 // app talks to an http address (the API or the token endpoint); an all-https build keeps Android's
 // default.
@@ -52,8 +49,7 @@ module.exports = {
           android: { icon: './assets/notification-icon.png', color: '#1F4BD8' },
           ios: {
             // The same address as the app (src/config.ts): staging when set, else the fake API.
-            apiUrl,
-            localSdkPath: fs.existsSync(path.resolve(__dirname, localIosSdk)) ? localIosSdk : undefined
+            apiUrl
           }
         }
       ],

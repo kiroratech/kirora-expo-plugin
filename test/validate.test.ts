@@ -11,8 +11,7 @@ test('accepts no options and every valid option', () => {
       notificationServiceExtension: false,
       deploymentTarget: '16.4',
       apiUrl: 'https://api.example.com',
-      appleTeamId: 'TEAM123456',
-      localSdkPath: '../kirora-ios'
+      appleTeamId: 'TEAM123456'
     }
   };
   assert.deepEqual(validateProps(props), props);

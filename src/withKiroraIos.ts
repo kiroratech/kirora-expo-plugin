@@ -212,6 +212,23 @@ const withExtensionTarget: ConfigPlugin<KiroraPluginProps> = (config, props) =>
     return config;
   });
 
+/**
+ * The kirora-ios copy @kirora/react-native bundles (CocoaPods trunk has no Kirora), relative to
+ * the Podfile, so the extension's pod is the version the app's SDK is.
+ */
+function bundledIosSdk({ projectRoot, platformProjectRoot }: { projectRoot: string; platformProjectRoot: string }): string {
+  let manifest: string;
+  try {
+    manifest = require.resolve('@kirora/react-native/package.json', { paths: [projectRoot] });
+  } catch {
+    fail('the Notification Service Extension needs @kirora/react-native installed');
+  }
+  const sdk = path.join(path.dirname(manifest), 'ios', 'vendor', 'kirora-ios');
+  // require.resolve gives a real path (macOS's /var is /private/var): compare it with one.
+  const podfileDir = path.join(fs.realpathSync(projectRoot), path.relative(projectRoot, platformProjectRoot));
+  return path.relative(podfileDir, sdk).split(path.sep).join('/');
+}
+
 function rubyString(value: string): string {
   return `'${value.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`;
 }
@@ -225,24 +242,8 @@ function withoutOurEdits(podfile: string): string {
 const withKiroraPodfile: ConfigPlugin<KiroraPluginProps> = (config, props) =>
   withPodfile(config, (config) => {
     let podfile = withoutOurEdits(config.modResults.contents);
-    const local = props.ios?.localSdkPath
-      ? path.resolve(config.modRequest.projectRoot, props.ios.localSdkPath)
-      : undefined;
-
-    if (local) {
-      // The app's `Kirora` pod (required by @kirora/react-native) from the local checkout.
-      const anchor = /^([ \t]*)use_expo_modules!.*$/m;
-      if (!anchor.test(podfile)) fail('ios.localSdkPath needs `use_expo_modules!` in the Podfile');
-      podfile = podfile.replace(
-        anchor,
-        (line, indent: string) =>
-          `${line}\n${indent}${PODFILE_BEGIN}\n${indent}pod 'Kirora', :path => ${rubyString(local)}\n${indent}${PODFILE_END}`
-      );
-    }
     if (nseEnabled(props)) {
-      const pod = local
-        ? `pod 'KiroraNotificationService', :path => ${rubyString(local)}`
-        : `pod 'KiroraNotificationService', '~> 0.1'`;
+      const pod = `pod 'KiroraNotificationService', :path => ${rubyString(bundledIosSdk(config.modRequest))}`;
       // A sibling of the app's target, so it gets none of the app's pods. Its platform is the
       // extension's deployment target, and its framework linkage the app's (the same lines as
       // Expo's template): CocoaPods rejects an extension whose linkage differs from the app's.

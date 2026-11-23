@@ -37,11 +37,6 @@ export interface KiroraPluginProps {
     apiUrl?: string;
     /** Apple team that signs the extension. Default: `ios.appleTeamId` of the app config. */
     appleTeamId?: string;
-    /**
-     * Development only: a local checkout of kirora-ios, used for the `Kirora` and
-     * `KiroraNotificationService` pods in place of released versions.
-     */
-    localSdkPath?: string;
   };
 }
 

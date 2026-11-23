@@ -4,8 +4,8 @@ An [Expo config plugin](https://docs.expo.dev/config-plugins/introduction/) for
 [`@kirora/react-native`](https://github.com/kiroratech/kirora-react-native). It adds Kirora's native
 push setup each time `npx expo prebuild` generates `android/` and `ios/`.
 
-> **0.1.0.** `@kirora/react-native` is not on npm and Kirora's iOS pods are not on CocoaPods yet.
-> The Android SDK is on Maven Central.
+> **0.1.0.** `@kirora/react-native` is not on npm yet. It bundles Kirora's iOS SDK, so nothing comes
+> from CocoaPods trunk; the Android SDK is on Maven Central.
 > Kirora needs a [development build](https://docs.expo.dev/develop/development-builds/introduction/):
 > Expo Go can't load its native code.
 
@@ -20,7 +20,8 @@ iPhone devices. `peerDependencies` also allow Expo SDK 53–57, untested.
   points Kirora's pushes at them. Warns when `android.googleServicesFile` is missing; Expo copies
   that file and applies the Google Services plugin.
 - **iOS:** sets the push entitlement (`aps-environment`). Adds a `KiroraNotificationService`
-  Notification Service Extension and its pod, for delivery reports, images and buttons, and
+  Notification Service Extension and its pod (from the copy `@kirora/react-native` bundles), for
+  delivery reports, images and buttons, and
   declares it to EAS Build. Copies `applinks:` hosts from `ios.associatedDomains` to Info.plist
   `KiroraUniversalLinkHosts`, so pushes' https links to your site open the app. It may miss a
   domain another plugin adds: list that under `ios.infoPlist.KiroraUniversalLinkHosts`.
@@ -33,8 +34,8 @@ Once the packages are published:
 npx expo install @kirora/react-native @kirora/expo-plugin
 ```
 
-Until then, install `@kirora/react-native` from a packed tarball and set `ios.localSdkPath` to a
-kirora-ios checkout. The [example app](#running-it-locally) does both.
+Until then, install `@kirora/react-native` from a packed tarball, as the
+[example app](#running-it-locally) does.
 
 ```json
 {
@@ -68,7 +69,6 @@ All optional. Paths are relative to the project root. Prebuild stops on an inval
 | `ios.deploymentTarget` | app's `ios.deploymentTarget`, else `15.1` | The extension's deployment target and Podfile platform. It doesn't set the app's minimum. |
 | `ios.apiUrl` | none | The `apiUrl` you pass in JS, if any: the extension can't read it. |
 | `ios.appleTeamId` | app's `ios.appleTeamId` | Apple team that signs the extension. |
-| `ios.localSdkPath` | none | A kirora-ios checkout for the Kirora pods, until they are published. |
 
 ### Sandbox or production
 
@@ -109,8 +109,9 @@ Kirora's forwarding integration
 An iOS app can have only one. If you already have one:
 
 1. Set `ios.notificationServiceExtension: false`.
-2. Add `KiroraNotificationService` to your extension's Podfile target. While it is unpublished, use
-   `pod 'KiroraNotificationService', :path => '/path/to/kirora-ios'`.
+2. Add `KiroraNotificationService` to your extension's Podfile target, from the copy
+   `@kirora/react-native` bundles:
+   `pod 'KiroraNotificationService', :path => '../node_modules/@kirora/react-native/ios/vendor/kirora-ios'`.
 3. With a custom `apiUrl`, set `KiroraApiUrl` in your extension's Info.plist. The plugin's
    `ios.apiUrl` only configures the extension it generates.
 4. Pass pushes to Kirora:
@@ -186,7 +187,7 @@ cleartext traffic in the Android build.
 ### Running it locally
 
 You need Node `^22.13.0 || ^24.3.0 || >= 26.0.0`; Xcode and CocoaPods for iOS; JDK 17 and the
-Android SDK for Android. Clone `kirora-react-native` and `kirora-ios` next to this repository.
+Android SDK for Android. Clone `kirora-react-native` next to this repository.
 The Android SDK comes from Maven Central. `@kirora/react-native` comes from
 `example/vendor/`; `npm run vendor-sdk` in `example/` refreshes it.
 
@@ -207,9 +208,9 @@ For Android push, add your own `example/google-services.json`.
 
 ### Building on EAS
 
-The `preview` profile builds an APK and an ad hoc iOS build. A pre-install hook fetches the iOS SDK
-at the `KIRORA_IOS_REF` commit in `eas.json`, the one the vendored `@kirora/react-native` was
-tested against; move it with the tarball. Android uses the published SDK.
+The `preview` profile builds an APK and an ad hoc iOS build. A pre-install hook compiles the
+plugin; the native SDKs come with the vendored `@kirora/react-native` (iOS) and from Maven Central
+(Android).
 
 `app.config.js` sets `owner: 'kirora'` and an EAS `projectId`. Replace or remove both, then:
 
