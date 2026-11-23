@@ -106,12 +106,12 @@ test("writes the Podfile block once, with the extension's platform and the app's
 test("takes the extension's pod from the kirora-ios copy @kirora/react-native bundles", async () => {
   assert.match(
     await podfile(),
-    /pod 'KiroraNotificationService', :path => '\.\.\/node_modules\/@kirora\/react-native\/ios\/vendor\/kirora-ios'/
+    /pod 'KiroraNotificationService', :path => File\.join\(File\.dirname\(`node --print "require\.resolve\('@kirora\/react-native\/package\.json'\)"`\), 'ios', 'vendor', 'kirora-ios'\)/
   );
   // Outside TMP_ROOT, whose node_modules has the package.
   const elsewhere = fs.mkdtempSync(path.join(os.tmpdir(), 'kirora-no-sdk-'));
-  const src = fs.readFileSync(path.join(FIXTURES, 'ios/Podfile'), 'utf8');
   try {
+    const src = fs.readFileSync(path.join(FIXTURES, 'ios/Podfile'), 'utf8');
     await assert.rejects(
       runMod(applyPlugin({}, baseConfig()), 'ios', 'podfile', { contents: src }, elsewhere),
       /needs @kirora\/react-native installed/

@@ -12,7 +12,7 @@ push setup each time `npx expo prebuild` generates `android/` and `ios/`.
 ## Compatibility
 
 Tested with Expo SDK 58 and `@kirora/react-native` 0.1.x, using the example app on Android and
-iPhone devices. `peerDependencies` also allow Expo SDK 53–57, untested.
+iPhone devices. `peerDependencies` allow Expo SDK 53 and later; versions other than 58 are untested.
 
 ## What it does
 
@@ -20,8 +20,8 @@ iPhone devices. `peerDependencies` also allow Expo SDK 53–57, untested.
   points Kirora's pushes at them. Warns when `android.googleServicesFile` is missing; Expo copies
   that file and applies the Google Services plugin.
 - **iOS:** sets the push entitlement (`aps-environment`). Adds a `KiroraNotificationService`
-  Notification Service Extension and its pod (from the copy `@kirora/react-native` bundles), for
-  delivery reports, images and buttons, and
+  Notification Service Extension and its pod (from the copy `@kirora/react-native` bundles),
+  for delivery reports, images and buttons, and
   declares it to EAS Build. Copies `applinks:` hosts from `ios.associatedDomains` to Info.plist
   `KiroraUniversalLinkHosts`, so pushes' https links to your site open the app. It may miss a
   domain another plugin adds: list that under `ios.infoPlist.KiroraUniversalLinkHosts`.
@@ -34,8 +34,8 @@ Once the packages are published:
 npx expo install @kirora/react-native @kirora/expo-plugin
 ```
 
-Until then, install `@kirora/react-native` from a packed tarball, as the
-[example app](#running-it-locally) does.
+Until then, install `@kirora/react-native` from a packed tarball and `@kirora/expo-plugin` from a
+checkout of this repository (`file:` dependencies), as the [example app](#running-it-locally) does.
 
 ```json
 {
@@ -111,13 +111,18 @@ An iOS app can have only one. If you already have one:
 1. Set `ios.notificationServiceExtension: false`.
 2. Add `KiroraNotificationService` to your extension's Podfile target, from the copy
    `@kirora/react-native` bundles:
-   `pod 'KiroraNotificationService', :path => '../node_modules/@kirora/react-native/ios/vendor/kirora-ios'`.
+
+   ```ruby
+   pod 'KiroraNotificationService', :path => File.join(File.dirname(`node --print "require.resolve('@kirora/react-native/package.json')"`), 'ios', 'vendor', 'kirora-ios')
+   ```
+
 3. With a custom `apiUrl`, set `KiroraApiUrl` in your extension's Info.plist. The plugin's
    `ios.apiUrl` only configures the extension it generates.
 4. Pass pushes to Kirora:
 
 ```swift
 import KiroraNotificationService
+import UserNotifications
 
 class NotificationService: UNNotificationServiceExtension {
     private var request: UNNotificationRequest?

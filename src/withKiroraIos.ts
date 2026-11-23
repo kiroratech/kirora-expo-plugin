@@ -213,20 +213,20 @@ const withExtensionTarget: ConfigPlugin<KiroraPluginProps> = (config, props) =>
   });
 
 /**
- * The kirora-ios copy @kirora/react-native bundles (CocoaPods trunk has no Kirora), relative to
- * the Podfile, so the extension's pod is the version the app's SDK is.
+ * The extension's pod comes from the kirora-ios copy @kirora/react-native bundles (CocoaPods trunk
+ * has no Kirora), so it's the version the app's SDK is. Found when `pod install` runs, as the
+ * Podfile finds `expo` and `react-native`, so it follows any node_modules layout.
  */
-function bundledIosSdk({ projectRoot, platformProjectRoot }: { projectRoot: string; platformProjectRoot: string }): string {
-  let manifest: string;
+const BUNDLED_EXTENSION_POD =
+  "pod 'KiroraNotificationService', :path => File.join(File.dirname(`node --print \"require.resolve('@kirora/react-native/package.json')\"`), 'ios', 'vendor', 'kirora-ios')";
+
+/** Fails prebuild early, with a clear message, when the app lacks @kirora/react-native. */
+function requireReactNativePackage(projectRoot: string): void {
   try {
-    manifest = require.resolve('@kirora/react-native/package.json', { paths: [projectRoot] });
+    require.resolve('@kirora/react-native/package.json', { paths: [projectRoot] });
   } catch {
     fail('the Notification Service Extension needs @kirora/react-native installed');
   }
-  const sdk = path.join(path.dirname(manifest), 'ios', 'vendor', 'kirora-ios');
-  // require.resolve gives a real path (macOS's /var is /private/var): compare it with one.
-  const podfileDir = path.join(fs.realpathSync(projectRoot), path.relative(projectRoot, platformProjectRoot));
-  return path.relative(podfileDir, sdk).split(path.sep).join('/');
 }
 
 function rubyString(value: string): string {
@@ -243,7 +243,7 @@ const withKiroraPodfile: ConfigPlugin<KiroraPluginProps> = (config, props) =>
   withPodfile(config, (config) => {
     let podfile = withoutOurEdits(config.modResults.contents);
     if (nseEnabled(props)) {
-      const pod = `pod 'KiroraNotificationService', :path => ${rubyString(bundledIosSdk(config.modRequest))}`;
+      requireReactNativePackage(config.modRequest.projectRoot);
       // A sibling of the app's target, so it gets none of the app's pods. Its platform is the
       // extension's deployment target, and its framework linkage the app's (the same lines as
       // Expo's template): CocoaPods rejects an extension whose linkage differs from the app's.
@@ -253,7 +253,7 @@ const withKiroraPodfile: ConfigPlugin<KiroraPluginProps> = (config, props) =>
         `  platform :ios, ${rubyString(extensionDeploymentTarget(config, props))}`,
         "  use_frameworks! :linkage => podfile_properties['ios.useFrameworks'].to_sym if defined?(podfile_properties) && podfile_properties['ios.useFrameworks']",
         "  use_frameworks! :linkage => ENV['USE_FRAMEWORKS'].to_sym if ENV['USE_FRAMEWORKS']",
-        `  ${pod}`,
+        `  ${BUNDLED_EXTENSION_POD}`,
         'end',
         PODFILE_END
       ];
