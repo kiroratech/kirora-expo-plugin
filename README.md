@@ -7,8 +7,8 @@ An [Expo config plugin](https://docs.expo.dev/config-plugins/introduction/) that
 push setup for [`@kirora/react-native`](https://github.com/kiroratech/kirora-react-native) each time
 `npx expo prebuild` generates `android/` and `ios/`.
 
-> **0.1.0 preview.** `@kirora/react-native` is not on npm yet. It bundles Kirora's iOS SDK, so
-> nothing comes from CocoaPods trunk; the Android SDK is on Maven Central. Kirora needs a
+> **0.1.0**, the first release. `@kirora/react-native` bundles Kirora's iOS SDK, so nothing comes
+> from CocoaPods trunk; the Android SDK is on Maven Central. Kirora needs a
 > [development build](https://docs.expo.dev/develop/development-builds/introduction/): Expo Go
 > can't load its native code.
 
@@ -23,14 +23,11 @@ Tested with the [example app](example/README.md) on Android and iPhone devices.
 
 ## Quick start
 
-1. **Install.** Once the packages are published:
+1. **Install:**
 
    ```sh
    npx expo install @kirora/react-native @kirora/expo-plugin
    ```
-
-   Until then, install `@kirora/react-native` from a packed tarball and `@kirora/expo-plugin` from
-   a checkout of this repository (`file:` dependencies), as the example app does.
 
 2. **Add the plugin** to your app config:
 

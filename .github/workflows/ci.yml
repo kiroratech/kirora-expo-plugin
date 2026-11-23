@@ -30,6 +30,8 @@ jobs:
       # --ignore-scripts: skips `prepare`, so the plugin is compiled once, by the next step.
       - run: npm ci --legacy-peer-deps --ignore-scripts
       - run: npm test
+      - name: Release plan tests
+        run: node --test scripts/release-plan.test.mjs
 
   example-prebuild:
     name: Prebuild the example app
