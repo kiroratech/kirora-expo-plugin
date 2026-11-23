@@ -8,3 +8,7 @@ example/.expo/
 example/google-services.json
 example/GoogleService-Info.plist
 build-test/
+example/.kirora/
+!example/vendor/*.tgz
+.env
+.env.local

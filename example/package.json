@@ -7,11 +7,15 @@
     "prebuild": "expo prebuild --clean",
     "start": "expo start --dev-client",
     "android": "expo run:android",
-    "ios": "expo run:ios"
+    "ios": "expo run:ios",
+    "eas-build-pre-install": "./scripts/eas-native-sdks.sh",
+    "vendor-sdk": "rm -f vendor/*.tgz && (cd ../../kirora-react-native && npm pack --pack-destination ../kirora-expo-plugin/example/vendor) && mv vendor/kirora-react-native-*.tgz vendor/kirora-react-native.tgz && npm install --legacy-peer-deps @kirora/react-native@file:vendor/kirora-react-native.tgz"
   },
   "dependencies": {
+    "@expo/vector-icons": "^15.0.2",
     "@kirora/expo-plugin": "file:..",
-    "@kirora/react-native": "file:../../kirora-react-native",
+    "@kirora/react-native": "file:vendor/kirora-react-native.tgz",
+    "@react-native-async-storage/async-storage": "2.2.0",
     "expo": "~58.0.26",
     "expo-status-bar": "~58.0.5",
     "react": "19.3.0",

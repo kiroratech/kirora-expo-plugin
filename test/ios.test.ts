@@ -121,6 +121,27 @@ test('sets aps-environment from mode', async () => {
   assert.equal(result.modResults['aps-environment'], 'production');
 });
 
+test("lists the app's universal-link hosts for the Kirora iOS SDK, keeping the app's own", async () => {
+  const config = baseConfig({
+    ios: {
+      associatedDomains: ['applinks:shop.example.com', 'webcredentials:example.com', 'applinks:*.example.org?mode=developer'],
+      entitlements: { 'com.apple.developer.associated-domains': ['applinks:shop.example.com', 'applinks:other.example.net'] }
+    }
+  });
+  const result = await runMod(applyPlugin({}, config), 'ios', 'infoPlist', { KiroraUniversalLinkHosts: ['mine.example.com'] }, TMP_ROOT);
+  assert.deepEqual(result.modResults.KiroraUniversalLinkHosts, [
+    'mine.example.com',
+    'shop.example.com',
+    '*.example.org',
+    'other.example.net'
+  ]);
+});
+
+test('adds no KiroraUniversalLinkHosts to an app without universal links', async () => {
+  const result = await runMod(applyPlugin(), 'ios', 'infoPlist', {}, TMP_ROOT);
+  assert.equal('KiroraUniversalLinkHosts' in result.modResults, false);
+});
+
 test('registers the extension with EAS Build', () => {
   const extensions = (applyPlugin().extra as any).eas.build.experimental.ios.appExtensions;
   assert.deepEqual(extensions, [

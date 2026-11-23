@@ -1,0 +1,20 @@
+{
+  "cli": {
+    "version": ">= 16.0.0",
+    "appVersionSource": "local"
+  },
+  "build": {
+    "preview": {
+      "distribution": "internal",
+      "env": {
+        "KIRORA_IOS_SDK_PATH": "./.kirora/kirora-ios",
+        "KIRORA_ANDROID_REF": "74d178f77fb7d385d300fc3997f81021837bdbc5",
+        "KIRORA_IOS_REF": "afb79fcfbd1c87686e5d8093365bd30ae9a007e3"
+      },
+      "android": {
+        "buildType": "apk"
+      },
+      "environment": "preview"
+    }
+  }
+}
