@@ -2,7 +2,7 @@
 // `npx expo prebuild --clean` must produce a working app with no native edits.
 const fs = require('fs');
 const path = require('path');
-const { withAndroidManifest, withProjectBuildGradle } = require('expo/config-plugins');
+const { withAndroidManifest } = require('expo/config-plugins');
 
 // Not committed: each developer and CI supplies their own Firebase project's file. On EAS, upload
 // it as a file environment variable named GOOGLE_SERVICES_JSON.
@@ -11,21 +11,6 @@ const hasGoogleServices = fs.existsSync(path.resolve(__dirname, googleServices))
 
 // Until Kirora's iOS pods are published, build against a local kirora-ios checkout.
 const localIosSdk = process.env.KIRORA_IOS_SDK_PATH ?? '../../kirora-ios';
-
-// Until the Kirora Android SDK is published, it comes from `./gradlew publishToMavenLocal` in a
-// kirora-android checkout. @kirora/react-native looks in mavenLocal() only for its own module, so
-// the app needs it too. Example-only: not something @kirora/expo-plugin should do for real apps.
-const MAVEN_LOCAL = '    mavenLocal() // Kirora example: local SDK builds';
-const withMavenLocal = (config) =>
-  withProjectBuildGradle(config, (config) => {
-    if (!config.modResults.contents.includes(MAVEN_LOCAL)) {
-      config.modResults.contents = config.modResults.contents.replace(
-        /allprojects\s*\{\s*repositories\s*\{/,
-        (match) => `${match}\n${MAVEN_LOCAL}`
-      );
-    }
-    return config;
-  });
 
 // The fake API is plain http, which Android refuses outside debug builds. Allowed only while the
 // app talks to an http address (the API or the token endpoint); an all-https build keeps Android's
@@ -72,7 +57,6 @@ module.exports = {
           }
         }
       ],
-      withMavenLocal,
       withHttpApi
     ]
   }
