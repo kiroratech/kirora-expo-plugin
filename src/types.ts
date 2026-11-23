@@ -1,8 +1,9 @@
 /** Options of `["@kirora/expo-plugin", { ... }]` in the app config. All are optional. */
 export interface KiroraPluginProps {
   /**
-   * iOS `aps-environment`: `development` for debug/development builds, `production` for
-   * TestFlight and the App Store. Default `development`.
+   * iOS `aps-environment` in the app's entitlements. Default `development`. Exporting for
+   * distribution (any EAS build, TestFlight, App Store) rewrites it to `production`, so it only
+   * decides builds run straight from Xcode or `npx expo run:ios`.
    */
   mode?: 'development' | 'production';
 
@@ -36,11 +37,6 @@ export interface KiroraPluginProps {
     apiUrl?: string;
     /** Apple team that signs the extension. Default: `ios.appleTeamId` of the app config. */
     appleTeamId?: string;
-    /**
-     * Development only: a local checkout of kirora-ios, used for the `Kirora` and
-     * `KiroraNotificationService` pods in place of released versions.
-     */
-    localSdkPath?: string;
   };
 }
 

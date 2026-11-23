@@ -14,6 +14,11 @@ export const PROJECT_NAME = 'HelloWorld';
 export const TMP_ROOT = fs.mkdtempSync(path.join(os.tmpdir(), 'kirora-expo-plugin-'));
 process.on('exit', () => fs.rmSync(TMP_ROOT, { recursive: true, force: true }));
 
+// An installed @kirora/react-native, which the extension's pod needs.
+const rnPackage = path.join(TMP_ROOT, 'node_modules', '@kirora', 'react-native');
+fs.mkdirSync(rnPackage, { recursive: true });
+fs.writeFileSync(path.join(rnPackage, 'package.json'), '{"name":"@kirora/react-native"}');
+
 export function baseConfig(overrides: Partial<ExpoConfig> = {}): ExpoConfig {
   return {
     name: PROJECT_NAME,

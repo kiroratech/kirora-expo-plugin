@@ -32,7 +32,9 @@ diff -r "$snapshot/android" android || fail 'android/ changed on the second preb
 
 targets=$(grep -c 'isa = PBXNativeTarget' "$pbxproj")
 [ "$targets" -eq 2 ] || fail "expected 2 Xcode targets (app + extension), found $targets"
-grep -q "PRODUCT_BUNDLE_IDENTIFIER = \"io.kirora.expoexample.$NSE\"" "$pbxproj" || fail 'extension bundle identifier missing'
+grep -q "PRODUCT_BUNDLE_IDENTIFIER = \"io.kirora.demo.shop.$NSE\"" "$pbxproj" || fail 'extension bundle identifier missing'
+# Its module must not be KiroraNotificationService, or it shadows the pod it imports.
+grep -q 'PRODUCT_MODULE_NAME = KiroraNotificationServiceApp;' "$pbxproj" || fail 'extension module name missing'
 
 blocks=$(grep -c "^target '$NSE' do" ios/Podfile)
 [ "$blocks" -eq 1 ] || fail "expected 1 extension target in the Podfile, found $blocks"
